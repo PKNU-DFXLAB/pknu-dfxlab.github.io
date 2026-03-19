@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+  <head>
+  <meta property="og:title" content="DFX Lab. | 국립부경대학교">
+  <meta property="og:description" content="국립부경대학교 정보보안 연구실 - 디지털 포렌식, 암호 분석, 취약점 분석">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="img/og-thumbnail.png"> 
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DFX Lab. — Digital Forensics with X | 국립부경대학교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F8FA;
+    --bg-white: #FFFFFF;
+    --text-primary: #1A1D23;
+    --text-secondary: #5A5F6B;
+    --text-muted: #8B8F99;
+    --accent: #2563EB;
+    --accent-light: #DBEAFE;
+    --accent-dark: #1D4ED8;
+    --cyan: #06B6D4;
+    --cyan-light: #CFFAFE;
+    --emerald: #10B981;
+    --emerald-light: #D1FAE5;
+    --border: #E5E7EB;
+    --border-light: #F0F1F3;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans KR', 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border-light);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 0 40px;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+  .nav-logo-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 0.55rem;
+    letter-spacing: -0.02em;
+  }
+  .nav-logo-text {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+  }
+  .nav-logo-text small {
+    font-weight: 400;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    display: block;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-top: 1px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+  .nav-toggle { display: none; }
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+
+  .nav-toggle {
+    display: block;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.97);
+    border-bottom: 1px solid var(--border-light);
+    padding: 12px 20px 16px;
+    z-index: 49;
+  }
+
+  /* 체크박스 클릭되면 메뉴 보이게 */
+  #nav-check:checked ~ .nav-links {
+    display: flex;
+  }
+}
+
+  /* ── SHARED ── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 72px 40px;
+  }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+  .section-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    max-width: 600px;
+    line-height: 1.8;
+  }
+  .divider {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .divider hr {
+    border: none;
+    border-top: 1px solid var(--border-light);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 40px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero-univ {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .hero-content h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-bottom: 8px;
+  }
+  .hero-content h1 .gradient-text {
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-fullname {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+  .hero-subtitle {
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    line-height: 1.85;
+  }
+  .hero-subtitle strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .hero-tags .tag {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid;
+  }
+  .tag-blue { background: var(--accent-light); color: var(--accent-dark); border-color: #BFDBFE; }
+  .tag-cyan { background: var(--cyan-light); color: #0E7490; border-color: #A5F3FC; }
+  .tag-green { background: var(--emerald-light); color: #047857; border-color: #A7F3D0; }
+  .tag-gray { background: #F3F4F6; color: #4B5563; border-color: #E5E7EB; }
+  .tag-yellow { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+
+  .hero-cta-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.25s;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+  }
+  .hero-cta:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+  }
+  .hero-cta-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--accent);
+    padding: 12px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1.5px solid var(--accent);
+    transition: all 0.25s;
+  }
+  .hero-cta-outline:hover {
+    background: var(--accent-light);
+    transform: translateY(-1px);
+  }
+  .hero-cta svg, .hero-cta-outline svg { width: 16px; height: 16px; }
+
+  /* Hero Visual */
+  .hero-visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .hero-graphic {
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1;
+    position: relative;
+  }
+  .hex-ring {
+    position: absolute;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    animation: pulse-ring 4s ease-in-out infinite;
+  }
+  .hex-ring:nth-child(1) { inset: 15%; border-color: rgba(37,99,235,0.15); animation-delay: 0s; }
+  .hex-ring:nth-child(2) { inset: 5%; border-color: rgba(6,182,212,0.1); animation-delay: 1.3s; }
+  .hex-ring:nth-child(3) { inset: -5%; border-color: rgba(16,185,129,0.08); animation-delay: 2.6s; }
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.03); opacity: 0.6; }
+  }
+  .hero-center-badge {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px; height: 140px;
+    background: white;
+    border-radius: 28px;
+    box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .hero-center-badge .dfx {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.45rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.04em;
+  }
+  .hero-center-badge .label {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .floating-node {
+    position: absolute;
+    background: white;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    padding: 10px 16px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 3;
+    animation: float 6s ease-in-out infinite;
+    border: 1px solid var(--border-light);
+  }
+  .floating-node .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .node-1 { top: 8%; left: 5%; animation-delay: 0s; }
+  .node-1 .dot { background: var(--accent); }
+  .node-2 { top: 5%; right: 2%; animation-delay: 0.8s; }
+  .node-2 .dot { background: var(--cyan); }
+  .node-3 { bottom: 22%; left: -2%; animation-delay: 1.6s; }
+  .node-3 .dot { background: var(--emerald); }
+  .node-4 { bottom: 5%; right: 8%; animation-delay: 2.4s; }
+  .node-4 .dot { background: #F59E0B; }
+  .node-5 { top: 42%; right: -8%; animation-delay: 3.2s; }
+  .node-5 .dot { background: #8B5CF6; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  /* ── RECRUIT ── */
+  .recruit-banner {
+    background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 40%, #0E7490 100%);
+    border-radius: var(--radius);
+    padding: 48px 44px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .recruit-banner::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .recruit-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -30%; left: -5%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .recruit-content {
+    position: relative;
+    z-index: 1;
+  }
+  .recruit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+  }
+  .recruit-badge .pulse {
+    width: 8px; height: 8px;
+    background: #34D399;
+    border-radius: 50%;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .recruit-banner h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+  .recruit-banner .sub {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    margin-bottom: 28px;
+    line-height: 1.7;
+  }
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .theme-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.25s;
+  }
+  .theme-card:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+  }
+  .theme-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px; /* 기존 theme-tag margin-bottom 대체 */
+    flex-wrap: wrap;
+  }
+  .theme-card .theme-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+    /* margin-bottom: 6px; */
+  }
+  .theme-card h4 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .theme-card p {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    line-height: 1.6;
+  }
+  .theme-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.badge-study   { background: rgba(255, 251, 0, 0.2); color: #ffffff; }
+.badge-paper   { background: rgba(0, 255, 170, 0.2); color: #ffffff; }
+.badge-ctf     { background: rgba(245,158,11,0.2); color: #ffffff; }
+.badge-cve     { background: rgba(239,68,68,0.2);  color: #ffffff; }
+.badge-explore { background: rgba(139,92,246,0.2); color: #ffffff; }
+  .recruit-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn-apply {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: var(--accent-dark);
+    padding: 13px 32px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.25s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .btn-apply:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .btn-apply svg { width: 16px; height: 16px; }
+  .recruit-email {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  .recruit-email a {
+    color: white;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ── RESEARCH ── */
+  .research-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .research-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .research-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .research-card:hover {
+    border-color: transparent;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+  .research-card:hover::before { opacity: 1; }
+  .research-card:nth-child(1)::before { background: var(--accent); }
+  .research-card:nth-child(2)::before { background: var(--cyan); }
+  .research-card:nth-child(3)::before { background: var(--emerald); }
+  .research-card:nth-child(4)::before { background: #F59E0B; }
+  .research-card:nth-child(5)::before { background: #8B5CF6; }
+  .card-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 1.2rem;
+  }
+  .card-icon-blue { background: var(--accent-light); }
+  .card-icon-cyan { background: var(--cyan-light); }
+  .card-icon-green { background: var(--emerald-light); }
+  .card-icon-yellow { background: #FEF3C7; }
+  .card-icon-purple { background: #EDE9FE; }
+  .card-icon-black { background: #a3a3a3; }
+  .research-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .research-card .en {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .research-card p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .rg-group-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  margin-top: 28px;
+}
+.rg-group-label:first-of-type { margin-top: 0; }
+.rg-group-label span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.rg-group-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+  /* 하단 카드에 추가 */
+  .research-card.secondary {
+    /* background: var(--bg-subtle); */
+    background: #f5ffff; 
+    border-color: #7494ff;
+  }
+  /* .research-card.open {
+    background: #fffbf7; 
+    border-color: #fde8d0; 
+  } */
+  .research-card.open {
+    /* background: var(--bg-subtle); secondary랑 같은 배경 */
+    background: #fffbf7; 
+    border-color: #ffd5a8;
+  }
+  /* ── CONTACT ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .contact-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    transition: all 0.3s;
+  }
+  .contact-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-light);
+  }
+  .contact-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+  }
+  .contact-icon-blue { background: var(--accent-light); }
+  .contact-icon-green { background: var(--emerald-light); }
+  .contact-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .contact-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .contact-card a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .contact-card a:hover { text-decoration: underline; }
+  .map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 7px 14px;
+    background: #F0FDF4;
+    color: #16A34A !important;
+    border: 1px solid #BBF7D0;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: all 0.2s;
+  }
+  .map-link:hover { background: #DCFCE7; transform: translateY(-1px); }
+
+  /* ── PROFESSOR ── */
+  .prof-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 44px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .prof-photo {
+    width: 200px; height: 240px;
+    background: linear-gradient(135deg, var(--accent-light), var(--cyan-light));
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 500;
+    gap: 8px;
+    /* border: 2px dashed var(--border); */
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .prof-photo svg {
+    width: 40px; height: 40px;
+    opacity: 0.5;
+  }
+  .prof-photo img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  }
+  .prof-info h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.02em;
+  }
+  .prof-info .en-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .prof-info .position {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .prof-email-line {
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+  }
+  .prof-email-line a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .prof-email-line a:hover { text-decoration: underline; }
+  .prof-info .bio-section {
+    margin-bottom: 20px;
+  }
+  .prof-info .bio-section h4 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.02em;
+  }
+  .prof-info .bio-section h4 .dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .bio-list {
+    list-style: none;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 2;
+  }
+  .bio-list li::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 4px;
+    background: var(--border);
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .prof-links {
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .prof-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .prof-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  /* ── 연구 성과 (Output) ── */
+  .output-empty {
+    background: var(--bg-white);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 64px 40px;
+    text-align: center;
+  }
+  .output-empty .emoji {
+    font-size: 3rem;
+    margin-bottom: 16px;
+  }
+  .output-empty h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .output-empty p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 480px;
+    margin: 0 auto 24px;
+  }
+  .output-empty .cta-recruit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    background: var(--accent);
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: all 0.25s;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.2);
+  }
+  .output-empty .cta-recruit:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+  }
+  .output-categories {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 28px;
+  }
+  .output-cat {
+    text-align: center;
+  }
+  .output-cat .cat-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 1.3rem;
+  }
+  .output-cat .cat-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .output-cat .cat-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 40px;
+  }
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+  }
+  .footer-logo .mini-icon {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    font-weight: 700;
+  }
+  footer .copy { font-size: 0.78rem; color: var(--text-muted); }
+  footer .univ { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 50px 24px 40px; gap: 40px; }
+    .hero-visual { display: none; }
+    .hero-content h1 { font-size: 2.4rem; }
+    .research-grid { grid-template-columns: 1fr 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .theme-grid { grid-template-columns: 1fr; }
+    .prof-card { grid-template-columns: 1fr; }
+    .prof-photo { width: 160px; height: 200px; }
+    .section { padding: 50px 24px; }
+    nav { padding: 0 20px; }
+    .footer-inner { flex-direction: column; gap: 12px; }
+    .recruit-banner { padding: 36px 28px; }
+    .output-categories { gap: 20px; }
+  }
+  @media (max-width: 540px) {
+    .hero-content h1 { font-size: 1.9rem; }
+    .research-grid { grid-template-columns: 1fr; }
+    .nav-links a { padding: 8px 10px; font-size: 0.8rem; }
+    .output-categories { flex-direction: column; gap: 16px; }
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fadeUp 0.7s ease forwards;
+  }
+  .fade-up:nth-child(1) { animation-delay: 0.1s; }
+  .fade-up:nth-child(2) { animation-delay: 0.2s; }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* placeholder */
+  .placeholder {
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+</style>
+</head>
+
+
+<script>
+  window.addEventListener('beforeunload', () => {
+    sessionStorage.setItem('scrollPos', window.scrollY);
+  });
+  window.addEventListener('load', () => {
+    const pos = sessionStorage.getItem('scrollPos');
+    if (pos) window.scrollTo(0, parseInt(pos));
+  });
+</script>
+
+
+<body>
+
+  <!-- 크롤러용 더미 이미지 - 화면에는 안 보임 -->
+  <img src="img/og-thumbnail.png" 
+       alt="" 
+       style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;">
+  
+
+       
+
+<!-- ▸ Navigation -->
+<nav>
+  <div class="nav-inner">
+    <a href="#home" class="nav-logo">
+      <div class="nav-logo-icon">DFX</div>
+      <div class="nav-logo-text">
+        DFX Lab.
+        <small>Pukyong National Univ.</small>
+      </div>
+    </a>
+
+        <!-- 이 두 줄만 추가 -->
+    <input type="checkbox" id="nav-check" hidden>
+    <label for="nav-check" class="nav-toggle">&#9776;</label>
+
+    <div class="nav-links">
+      <a href="#home" class="active">Home</a>
+      <a href="#recruit">모집</a>
+      <a href="#research">연구분야</a>
+      <a href="#contact">연락처</a>
+      <a href="#professor">교수소개</a>
+      <a href="#output">연구결과</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ▸ 1. HERO
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="hero" id="home">
+  <div class="hero-content fade-up">
+    <p class="hero-univ">국립부경대학교 · Pukyong National University</p>
+    <h1>
+      <span class="gradient-text">DFX</span> Lab.
+    </h1>
+    <p class="hero-fullname">Digital Forensics with X</p>
+    <p class="hero-subtitle">
+      <strong>DFX Lab.</strong>은 디지털 포렌식 중심의 사이버 보안 분석을 목표로 합니다. 이를 위해 본 연구실에서는 기존 디지털 포렌식에 역공학·취약점 분석·암호 해독·최적화·인공지능 등을 접목하여 연구를 확장(<strong>eXtend</strong>)하고, 공략(<strong>eXploit</strong>)하고, 탐구(<strong>eXplore</strong>)합니다.
+    </p>
+    <div class="hero-tags">
+      <span class="tag tag-blue">Digital Forensics</span>
+      <span class="tag tag-cyan">Reverse Engineering</span>
+      <span class="tag tag-gray">Cryptanalysis</span>
+      <span class="tag tag-green">Vulnerability Analysis</span>
+      <span class="tag tag-yellow">AI-driven Security Analysis</span>
+    </div>
+    <div class="hero-cta-group">
+      <a href="#recruit" class="hero-cta">
+        연구 친구 모집 중!
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      </a>
+      <a href="mailto:GYKim@pknu.ac.kr" class="hero-cta-outline">
+        Contact Us
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0l-9.75 6.093L2.25 6.75"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-graphic">
+      <div class="hex-grid">
+        <div class="hex-ring"></div>
+        <div class="hex-ring"></div>
+        <div class="hex-ring"></div>
+      </div>
+      <div class="hero-center-badge">
+        <div class="dfx">DFX Lab.</div>
+        <div class="label">Research Areas</div>
+      </div>
+      <div class="floating-node node-1"><div class="dot"></div>Digital Forensics</div>
+      <div class="floating-node node-2"><div class="dot"></div>Reverse Engineering</div>
+      <div class="floating-node node-3"><div class="dot"></div>Artificial Intelligence</div>
+      <div class="floating-node node-4"><div class="dot"></div>Cryptanalysis</div>
+      <div class="floating-node node-5"><div class="dot"></div>Vulnerability Analysis</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ▸ 2. 모집
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="recruit">
+  <div class="recruit-banner">
+    <div class="recruit-content">
+      <div class="recruit-badge">
+        <div class="pulse"></div>
+        NOW RECRUITING
+      </div>
+      <h2>[공지] 함께 연구할 친구들을 모집합니다</h2>
+      <p class="sub">
+        현재 DFX에서는 함께 연구를 수행할 친구들을 모집하고 있습니다.<br>
+        다양한 연구 주제가 준비되어 있으며, 각각의 연구 주제는 논문 작성 혹은 대외 활동 참여를 목표로 합니다.<br>
+        (주제 세부 연구 내용은 오프라인으로 안내됩니다.)<br>
+        <br>
+        관심이 있는 친구들은 아래의 상담 신청하기를 통해 상담을 신청해 주시기 바랍니다😄<br>
+        원활한 상담을 위해 일정 이상의 인원이 모이면, 상담 신청이 마감될 수 있는 점 참고 부탁드립니다!
+        <br>
+        <h3>
+        모집 대상: 서로를 배려할 수 있는 따뜻한 마음과 열정이 있는 학부 2학년 이상의 친구들
+        <br>
+        모집 정원: (미확정)
+        </h3>
+        <br>
+        
+      </p>
+
+      <div class="theme-grid">
+        <div class="theme-card">
+          <div class="theme-header">
+            <div class="theme-tag">THEME A</div>
+            <div class="theme-badges">
+              <span class="badge badge-study">📚 스터디</span>
+              <span class="badge badge-paper">📄 논문</span>
+            </div>
+          </div>
+          <h4>인공지능과 디지털 포렌식</h4>
+          <p>디지털 포렌식 수사에 활용 가능한 인공지능 기법을 연구합니다.</p>
+        </div>
+
+        <div class="theme-card">
+          <div class="theme-header">
+            <div class="theme-tag">THEME B</div>
+            <div class="theme-badges">
+              <span class="badge badge-study">📚 스터디</span>
+              <span class="badge badge-paper">📄 논문</span>
+            </div>
+          </div>
+          <h4>역공학과 디지털 포렌식</h4>
+          <p>응용 프로그램을 역공학하여 디지털 포렌식 수사에 활용할 수 있는 기법을 연구합니다.</p>
+        </div>
+
+        <div class="theme-card">
+          <div class="theme-header">
+            <div class="theme-tag">THEME C</div>
+            <div class="theme-badges">
+              <span class="badge badge-study">📚 스터디</span>
+              <span class="badge badge-ctf">🏆 CTF</span>
+              <span class="badge badge-cve">🔎 CVE</span>
+            </div>
+          </div>
+          <h4>취약점 분석</h4>
+          <p>응용 프로그램을 역공학하여 취약점을 분석하고 방어 전략을 연구합니다.</p>
+        </div>
+
+        <div class="theme-card">
+          <div class="theme-header">
+            <div class="theme-tag">THEME D</div>
+            <div class="theme-badges">
+              <span class="badge badge-study">📚 스터디</span>
+              <span class="badge badge-paper">📄 논문</span>
+            </div>
+          </div>
+          <h4>암호 알고리즘 최적화 연구</h4>
+          <p>암호 알고리즘의 구성요소를 자동화된 방법으로 탐색·최적화하는 기법을 연구합니다.</p>
+        </div>
+
+        <div class="theme-card">
+          <div class="theme-header">
+            <div class="theme-tag">THEME E</div>
+            <div class="theme-badges">
+              <span class="badge badge-study">📚 스터디</span>
+              <span class="badge badge-paper">📄 논문</span>
+            </div>
+          </div>
+          <h4>암호 분석</h4>
+          <p>암호 알고리즘에 대한 공부와 동향 분석 그리고 실제 환경에서의 암호 알고리즘을 연구합니다.</p>
+        </div>
+
+        <div class="theme-card">
+          <div class="theme-header">
+            <div class="theme-tag">THEME F</div>
+            <div class="theme-badges">
+              <span class="badge badge-explore">🔎 탐구</span>
+            </div>
+          </div>
+          <h4>기타 연구</h4>
+          <p>정보보안 관련하여 본인이 하고 싶은 연구 주제가 있다면 작성해주세요(추후 상담 진행)</p>
+        </div>
+      </div>
+
+      <div class="recruit-actions">
+        <a href="https://form.everestwebdeals.co/?form=036795e2e90925619057038081e02578" target="_blank" class="btn-apply">
+          상담 신청 하기 (3월)
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"><hr></div>
+
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ▸ 3. 연구 분야
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="research">
+  <div class="section-label">Research</div>
+  <h2 class="section-title">연구 분야 · Research Areas</h2>
+  <div class="rg-group-label"><span>핵심 연구 분야</span></div>
+
+  <div class="research-grid">
+    <div class="research-card">
+      <div class="card-icon card-icon-blue">🔍</div>
+      <h3>디지털 포렌식</h3>
+      <div class="en">Digital Forensics</div>
+      <p>디지털 포렌식 수사 관점에서 메신저 앱 등 다양한 프로그램에 대한 데이터 추출·복호화를 통한 디지털 증거 수집·분석 기술을 연구합니다. 이 외에도 디스크, 메모리, 네트워크, 모바일 등 다양한 환경에서 증거를 수집·분석하는 기술을 연구합니다.</p>
+    </div>
+    
+    <div class="research-card">
+      <div class="card-icon card-icon-green">🛡️</div>
+      <h3>취약점 분석</h3>
+      <div class="en">Vulnerability Analysis</div>
+      <p>소프트웨어 및 시스템의 보안 취약점을 탐지하고 공격 기법을 분석하여 방어 전략을 연구합니다. 로그인 시스템 취약점, 브라우저 자격증명 탈취, 클라우드 데이터 접근 등 실제 환경에서 발생 가능한 공격 시나리오를 중심으로 연구합니다.</p>
+    </div>
+    <div class="research-card">
+      <div class="card-icon card-icon-yellow">🔐</div>
+      <h3>암호 분석</h3>
+      <div class="en">Cryptanalysis</div>
+      <p>암호 알고리즘에 대한 분석, 암호화된 데이터 복원 방안 연구, 암호 구성요소 최적화 설계 등 암호를 응용하는 분야를 탐구합니다.</p>
+    </div>
+  </div>
+  <div class="rg-group-label"><span>활용/확장 연구 분야</span></div>
+    <div class="research-grid">
+      <div class="research-card secondary">
+        <div class="card-icon card-icon-cyan">⚙️</div>
+        <h3>역공학</h3>
+        <div class="en">Reverse Engineering</div>
+        <p>바이너리 분석, 악성코드 분석, 프로토콜 분석 등 소프트웨어 역공학을 기반으로 보안 분석을 수행하고, 수행된 결과를 디지털 포렌식/취약점 분석/암호 분석에 활용하는 방안을 탐구합니다.<br>장기적으로 하드웨어 역공학을 목표로 연구를 확장할 예정입니다.</p>
+      </div>
+        
+      <div class="research-card secondary">
+        <div class="card-icon card-icon-purple">🤖</div>
+        <h3>지능형 보안 분석</h3>
+        <div class="en">AI-driven Security Analysis</div>
+        <p>디지털 포렌식, 역공학, 암호 분석 등 보안 연구 전반에 AI를 접목하여 분석 자동화·최적화·이상 탐지 등 지능형 보안 분석 기술을 연구합니다.</p>
+      </div>
+      <div class="research-card open">
+        <div class="card-icon card-icon-black">🔥</div>
+        <h3>열린 연구</h3>
+        <div class="en">Open Research</div>
+        <p>IoT·임베디드 보안, 클라우드 포렌식, 사이버 위협 인텔리전스 등 새로운 연구 분야를 학생 연구원들과 함께 개척해 나갑니다.<br>관심 있는 주제가 있다면 적극적으로 논의를 환영하며, 연구실의 기존 역량을 바탕으로 다양한 방향으로 확장해 나갈 예정입니다.</p>
+      </div>
+    </div>
+  
+</section>
+
+
+<div class="divider"><hr></div>
+
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ▸ 4. 연락처 / 위치
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="contact">
+  <div class="section-label">Contact</div>
+  <h2 class="section-title">연락처 · Location</h2>
+  <div class="contact-grid">
+    
+  <div class="contact-card">
+  <div class="contact-icon contact-icon-green">✉️</div>
+  <div style="flex:1;">
+    <h3>Contact Info</h3>
+    <div style="display:grid; grid-template-columns:auto 1fr; gap:2px 16px; font-size:0.88rem; line-height:1.9; color:var(--text-secondary);">
+      <span style="color:#9ca3af; font-size:0.8rem;">연락처</span>
+      <span><strong>김기윤 (Giyoon Kim)</strong></span>
+      
+      <span style="color:#9ca3af; font-size:0.8rem;">이메일</span>
+      <a href="mailto:GYKim@pknu.ac.kr">GYKim@pknu.ac.kr</a>
+      <span style="color:#9ca3af; font-size:0.8rem;">전화</span>
+      <span>051-629-6247</span>
+      <span style="color:#9ca3af; font-size:0.8rem;">상담시간</span>
+      <span>화/수/목 14:00–18:00 <small style="color:#9ca3af;">(사전 예약 권장)</small></span>
+    </div>
+  </div>
+</div>
+
+    <div class="contact-card">
+      <div class="contact-icon contact-icon-blue">📍</div>
+      <div>
+        <h3>Location</h3>
+        <p>
+          국립부경대학교 대연캠퍼스<br>
+          웅비관(A12) 1306호, 1307호
+        </p>
+        <a href="https://map.naver.com/p/search/%EB%B6%80%EA%B2%BD%EB%8C%80%ED%95%99%EA%B5%90%20%EC%9B%85%EB%B9%84%EA%B4%80" target="_blank" class="map-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          네이버 지도에서 보기
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"><hr></div>
+
+
+
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ▸ 5. 교수 소개
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="professor">
+  <div class="section-label">Professor</div>
+  <h2 class="section-title">지도교수 · Advisor</h2>
+
+  <div class="prof-card">
+    <div class="prof-photo">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"/></svg>
+      프로필 사진
+      <img src="img/kgy.jpg" alt="김기윤 교수 프로필 사진">
+    </div>
+    <div class="prof-info">
+      <h3>김기윤</h3>
+      <div class="en-name">Giyoon Kim, Ph.D.</div>
+      <div class="position">국립부경대학교 정보융합대학 컴퓨터·인공지능공학부 조교수</div>
+      <div class="position">국립부경대학교 일반대학원 정보보호학과 조교수</div>
+      <div class="prof-email-line">
+        ✉️ <a href="mailto:GYKim@pknu.ac.kr">GYKim@pknu.ac.kr</a>
+      </div>
+
+      <div class="bio-section">
+        <h4><span class="dot"></span> 학력 Education</h4>
+        <ul class="bio-list">
+          <li>2025 — 국민대학교 이학박사</li> 
+          <li>2019 — 국민대학교 이학사</li> 
+          <!-- <li><span class="placeholder">2025</span> — <span class="placeholder">국민대학교 이학박사</span></li>
+          <li><span class="placeholder">2019</span> — <span class="placeholder">국민대학교 이학사</span></li> -->
+        </ul>
+      </div>
+
+      <div class="bio-section">
+        <h4><span class="dot"></span> 경력 Experience</h4>
+        <ul class="bio-list">
+          <li>2026 — 현재: 국립부경대학교 컴퓨터·인공지능공학부 조교수</li>
+          <li>2026 — 현재: 국립부경대학교 일반대학원 정보보호학과 조교수</li>
+          <li>2025 — 2025: 대검찰청 검찰연구원</li>
+        </ul>
+      </div>
+
+      <div class="bio-section">
+        <h4><span class="dot"></span> 연구 관심사 Research Interests</h4>
+        <ul class="bio-list">
+          <li>Digital Forensics &amp; Incident Response</li>
+          <li>Reverse Engineering &amp; Malware Analysis</li>
+          <li>Cryptanalysis &amp; Applied Cryptography</li>
+          <li>Vulnerability Analysis &amp; Exploitation</li>
+          <li>AI-driven Security Analytics</li>
+        </ul>
+      </div>
+      <!-- 연구 성과 요약 -->
+      <div class="prof-stats" style="display:flex; gap:16px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+
+        <div style="text-align:center; flex:1;">
+          <div style="font-size:1.4rem; font-weight:700; color:var(--primary);">27</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">논문 (SCI(E) + 국제학술대회)</div>
+          <div style="margin-top:8px; display:flex; flex-direction:column; gap:4px; align-items:center;">
+            <a href="https://scholar.google.com/citations?view_op=list_works&hl=ko&user=dQD3mLcAAAAJ" target="_blank"
+              style="font-size:0.68rem; color:var(--text-muted); text-decoration:none; padding:2px 8px; border:1px solid var(--border); border-radius:20px; transition:all 0.2s;"
+              onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+              Google Scholar
+            </a>
+            <a href="https://dblp.org/pid/240/9540.html" target="_blank"
+              style="font-size:0.68rem; color:var(--text-muted); text-decoration:none; padding:2px 8px; border:1px solid var(--border); border-radius:20px; transition:all 0.2s;"
+              onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+              DBLP
+            </a>
+          </div>
+        </div>
+        <div style="width:1px; background:var(--border);"></div>
+        <div style="text-align:center; flex:1;">
+          <div style="font-size:1.4rem; font-weight:700; color:var(--primary);">9</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">특허</div>
+        </div>
+        <div style="width:1px; background:var(--border);"></div>
+        <div style="text-align:center; flex:1;">
+          <div style="font-size:1.4rem; font-weight:700; color:var(--primary);">1</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">표준화</div>
+        </div>
+      </div>
+
+
+    </div> <!-- prof-info 닫기 -->
+  </div> 
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"><hr></div>
+
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ▸ 6. 연구결과물 (DFX Lab)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section" id="output">
+  <div class="section-label">Output</div>
+  <h2 class="section-title">DFX Lab 연구결과 · Lab Output</h2>
+  <p class="section-desc">
+    DFX Lab에서 함께 만들어가는 연구 결과물을 이곳에 정리합니다.
+  </p>
+
+  <div class="output-empty">
+    <div class="emoji">🚀</div>
+
+    <div class="output-categories">
+      <div class="output-cat">
+        <div class="cat-icon card-icon-blue">📄</div>
+        <div class="cat-count">0</div>
+        <div class="cat-label">논문 Papers</div>
+      </div>
+      <div class="output-cat">
+        <div class="cat-icon card-icon-green">💡</div>
+        <div class="cat-count">0</div>
+        <div class="cat-label">특허 Patents</div>
+      </div>
+      <div class="output-cat">
+        <div class="cat-icon card-icon-cyan">📐</div>
+        <div class="cat-count">0</div>
+        <div class="cat-label">표준화 Standards</div>
+      </div>
+    </div>
+
+    <h3>아직 비어있지만, 곧 채워질 공간입니다.</h3>
+    <p>
+      DFX Lab와 연구결과를 함께 만들어갈 동료를 찾고 있습니다.
+    </p>
+    <a href="#recruit" class="cta-recruit">
+      함께 연구하러 가기
+    </a>
+  </div>
+</section>
+
+
+<!-- ▸ Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <div class="mini-icon">DFX</div>
+      DFX Lab
+    </div>
+    <span class="univ">국립부경대학교 (Pukyong National University)</span>
+    <span class="copy">&copy; 2025 DFX Lab. All rights reserved.</span>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', () => document.getElementById('nav-check').checked = false);
+  });
+</script>
+</body>
+</html>
