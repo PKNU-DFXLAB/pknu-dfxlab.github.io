@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DFX Lab — 강화학습 연구원 모집</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --bg2: #0d1117;
+    --accent: #00e5ff;
+    --accent2: #7b2fff;
+    --gold: #ffd166;
+    --text: #e8f0f8;
+    --muted: #6a7d94;
+    --border: rgba(0,229,255,0.15);
+    --glow: 0 0 30px rgba(0,229,255,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .poster {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 32px 64px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+
+  .lab-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .lab-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    text-shadow: var(--glow);
+  }
+
+  .lab-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+
+  .lab-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .badge-open {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 5px 12px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+  .badge-open::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    animation: pulse-bg 2s ease-in-out infinite;
+  }
+  @keyframes pulse-bg {
+    0%,100% { opacity: 0; }
+    50% { opacity: 0.08; }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.25s forwards;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-size: clamp(38px, 8vw, 64px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    text-shadow: var(--glow);
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 18px;
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight-box {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0,229,255,0.07) 0%, rgba(123,47,255,0.07) 100%);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.4s forwards;
+  }
+
+  .highlight-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  }
+
+  .highlight-box .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .highlight-box p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #c8d8e8;
+    font-weight: 300;
+  }
+
+  .highlight-box strong {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* ── WHAT WE NEED ── */
+  .section {
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.55s forwards;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .skill-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .skill-card {
+    background: var(--bg2);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 20px 22px;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: default;
+  }
+  .skill-card:hover {
+    border-color: rgba(0,229,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  .skill-card .icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .skill-card .skill-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 5px;
+  }
+
+  .skill-card .skill-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+    font-weight: 300;
+  }
+
+  .skill-card.required {
+    border-color: rgba(0,229,255,0.2);
+    background: linear-gradient(135deg, rgba(0,229,255,0.05) 0%, var(--bg2) 100%);
+  }
+
+  .skill-card.required .skill-name::after {
+    content: ' REQUIRED';
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  /* ── OFFER ── */
+  .offer-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.7s forwards;
+  }
+
+  .offer-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #c8d8e8;
+  }
+
+  .offer-list li .dot {
+    flex-shrink: 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 8px;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  /* ── BIG NUMBER ── */
+  .numbers-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.85s forwards;
+  }
+
+  .num-cell {
+    background: var(--bg);
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .num-cell .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .num-cell .num-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── CTA ── */
+  .cta-area {
+    text-align: center;
+    padding: 48px 32px;
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(123,47,255,0.05));
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 1s forwards;
+  }
+
+  .cta-area::before {
+    content: 'RL';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 120px;
+    font-weight: 700;
+    color: rgba(0,229,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .cta-area .cta-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .cta-area h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    text-decoration: none;
+    transition: all 0.25s;
+    box-shadow: 0 0 20px rgba(0,229,255,0.3);
+  }
+  .btn-primary:hover {
+    background: #fff;
+    box-shadow: 0 0 40px rgba(0,229,255,0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 13px 28px;
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    transition: all 0.25s;
+  }
+  .btn-secondary:hover {
+    background: rgba(0,229,255,0.1);
+    transform: translateY(-1px);
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 1.1s forwards;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer a { color: var(--muted); text-decoration: none; }
+  .footer a:hover { color: var(--accent); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 540px) {
+    .poster { padding: 32px 20px 48px; }
+    .skill-cards { grid-template-columns: 1fr; }
+    .numbers-row { grid-template-columns: 1fr 1fr 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .cta-buttons { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="lab-brand">
+      <span class="lab-logo">DFX Lab.</span>
+      <div class="lab-divider"></div>
+      <div class="lab-sub">국립부경대학교<br>Digital Forensics with X</div>
+    </div>
+    <div class="badge-open">Now Recruiting</div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow">Research Collaboration</div>
+    <h1>강화학습<br>연구원 <em>모집</em></h1>
+    <p class="hero-sub">
+      SCI(E)급 논문을 함께 쓸 강화학습(RL) 역량을 갖춘 연구원 <strong>2~3명</strong>을 모집합니다.
+      아이디어와 방향은 있습니다 — 함께 실현시켜 줄 동료가 필요합니다.
+    </p>
+  </div>
+
+  <!-- HIGHLIGHT -->
+  <div class="highlight-box">
+    <div class="label">Research Goal</div>
+    <p>
+      DFX Lab.은 보안 분야에 <strong>강화학습(Reinforcement Learning)</strong>을 접목한
+      <strong>IEEE Transactions</strong> 게재를 목표로 합니다.
+      <strong>2026년 내 연구 완료 및 논문 제출</strong>을 목표로 하며,
+      연구 아이디어와 도메인 지식은 준비되어 있습니다.
+      RL 구현 및 실험을 함께 이끌어갈 연구원을 찾고 있습니다.
+    </p>
+  </div>
+
+  <!-- WHAT WE NEED -->
+  <div class="section">
+    <div class="section-title">모집 조건 · What We Need</div>
+    <div class="skill-cards">
+      <div class="skill-card required">
+        <span class="icon">🤖</span>
+        <div class="skill-name">강화학습 (RL)</div>
+        <div class="skill-desc">Q-Learning, PPO, DQN 등 RL 알고리즘 구현 경험 또는 깊은 이해</div>
+      </div>
+      <div class="skill-card required">
+        <span class="icon">🐍</span>
+        <div class="skill-name">Python / 딥러닝</div>
+        <div class="skill-desc">PyTorch 또는 TensorFlow 기반 모델 구현 능력</div>
+      </div>
+      <div class="skill-card">
+        <span class="icon">📖</span>
+        <div class="skill-name">논문 읽기</div>
+        <div class="skill-desc">관련 논문 분석 및 재현(Reproduce) 경험 우대</div>
+      </div>
+      <div class="skill-card">
+        <span class="icon">💬</span>
+        <div class="skill-name">적극적 소통</div>
+        <div class="skill-desc">학부 3~4학년·대학원·인턴 모두 지원 가능. 열정과 책임감을 갖춘 분</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUMBERS -->
+  <div class="numbers-row">
+    <div class="num-cell">
+      <span class="num">2–3</span>
+      <span class="num-label">모집 인원</span>
+    </div>
+    <div class="num-cell">
+      <span class="num">~2026</span>
+      <span class="num-label">프로젝트 기간</span>
+    </div>
+    <div class="num-cell">
+      <span class="num">IEEE</span>
+      <span class="num-label">Transactions 목표</span>
+    </div>
+  </div>
+
+  <!-- WHAT YOU GET -->
+  <div class="section" style="animation-delay: 0.7s;">
+    <div class="section-title">연구원에게 드리는 것</div>
+    <ul class="offer-list">
+      <li><span class="dot"></span> 제1저자 또는 공동저자로 <strong>IEEE Transactions</strong> 게재 기회 (SCI(E)급)</li>
+      <li><span class="dot"></span> <strong>2026년 내</strong> 연구 완료 · 논문 제출을 목표로 한 집중 프로젝트</li>
+      <li><span class="dot"></span> 디지털 포렌식 · 사이버 보안 도메인 지식 학습 환경</li>
+      <li><span class="dot"></span> 활발한 연구 실적을 보유한 지도교수와의 밀착 협업</li>
+    </ul>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-area">
+    <div class="cta-label">Apply Now</div>
+    <h2>함께 논문을 써봅시다 🚀</h2>
+    <div class="cta-buttons">
+      <a href="/cdn-cgi/l/email-protection#591e00123034192932372c77383a77322b" class="btn-primary">메일로 연락하기</a>
+      <a href="https://dfx.pknu.ac.kr" target="_blank" class="btn-secondary">연구실 홈페이지</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>김기윤 교수 · <a href="/cdn-cgi/l/email-protection#d7908e9cbeba97a7bcb9a2f9b6b4f9bca5"><span class="__cf_email__" data-cfemail="1e59475577735e6e
